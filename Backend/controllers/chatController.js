@@ -3,7 +3,10 @@ import ConversationSession from "../models/conversationSessionModel.js";
 import Message from  "../models/messageModel.js"
 import Order from "../models/Order.js";
 import { queryGrok } from "../grokClient.js";
+<<<<<<< HEAD
 
+=======
+>>>>>>> d5fb57e1e03d4688e7b9aeae313f85eec7f81427
 const getAIResponse = async (prompt) => {
   return `You said: "${prompt}" — this is an AI response.`;
 };
@@ -77,8 +80,11 @@ export const chat = async (req, res) => {
 
 }
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> d5fb57e1e03d4688e7b9aeae313f85eec7f81427
 export const query = async (req, res) => {
   const { userId, message, conversationId } = req.body;
 
@@ -117,4 +123,7 @@ If the query is clear, respond strictly in this JSON format:
     res.status(500).json({ error: "LLM failure" });
   }
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> d5fb57e1e03d4688e7b9aeae313f85eec7f81427
