@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
 import ConversationSession from "../models/conversationSessionModel.js";
 import Message from  "../models/messageModel.js"
-
+import Order from "../models/Order.js";
+import { queryGrok } from "../grokClient.js";
 const getAIResponse = async (prompt) => {
   return `You said: "${prompt}" — this is an AI response.`;
 };
@@ -73,4 +74,43 @@ export const chat = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 
+}
+
+export const query = async (req, res) => {
+  const { userId, message, conversationId } = req.body;
+
+  const systemPrompt = `
+You are Grok, an intelligent assistant helping users fetch order data.
+If the user question is vague or lacks filters (like status or date), ask a clarifying question.
+If the query is clear, respond strictly in this JSON format:
+
+{
+  "action": "query",
+  "filter": {
+    "status": "...",
+    "createdAt": { "$gte": "...", "$lte": "..." }
+  }
+}
+`;
+
+  try {
+    const aiResponse = await queryGrok({
+      systemPrompt,
+      userMessage: message,
+    });
+
+    try {
+      const parsed = JSON.parse(aiResponse);
+      if (parsed.action === "query") {
+        const orders = await Order.find(parsed.filter).limit(20);
+        return res.json({ type: "results", data: orders });
+      }
+    } catch (e) {
+      // Not JSON = clarification or natural text
+      return res.json({ type: "clarification", message: aiResponse });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "LLM failure" });
+  }
 }
