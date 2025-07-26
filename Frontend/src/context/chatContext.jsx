@@ -8,17 +8,45 @@ export const ChatProvider = ({ children }) => {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // 🔥 NEW: Save multiple conversations
+  const [conversations, setConversations] = useState([]);
+  const [selectedConversationId, setSelectedConversationId] = useState(null);
+
+  const saveConversation = (title = "Untitled") => {
+    const newConvo = {
+      id: Date.now(),
+      title,
+      messages: [...messages],
+    };
+    setConversations([newConvo, ...conversations]);
+  };
+
+  const loadConversation = (id) => {
+    const convo = conversations.find((c) => c.id === id);
+    if (convo) {
+      setMessages(convo.messages);
+      setSelectedConversationId(id);
+    }
+  };
+
   return (
-    <ChatContext.Provider value={{ messages, input, loading, setMessages, setInput, setLoading }}>
+    <ChatContext.Provider
+      value={{
+        messages,
+        setMessages,
+        input,
+        setInput,
+        loading,
+        setLoading,
+        conversations,
+        saveConversation,
+        loadConversation,
+        selectedConversationId,
+      }}
+    >
       {children}
     </ChatContext.Provider>
   );
 };
 
-export const useChat = () => {
-  const context = useContext(ChatContext);
-  if (!context) {
-    throw new Error("useChat must be used within a ChatProvider");
-  }
-  return context;
-};
+export const useChat = () => useContext(ChatContext);
